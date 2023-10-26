@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 import AdminRoute from './routes/admin.js';
 import mongoose from 'mongoose';
 
-
 // Express App
 const app = express();
 

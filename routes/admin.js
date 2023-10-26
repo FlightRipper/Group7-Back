@@ -1,35 +1,20 @@
 import express from 'express';
-import AdminModel from '../models/adminModel.js';
+import {createAdmin,getAdmin,postOneAdmin,deleteAdmin} from '../controllers/adminController.js'
 
 const router = express.Router();
 
 // GET all 
-router.get('/', (req, res) => {
-    res.json({msg: 'GET all'})
-})
+router.get('/', getAdmin)
 
 
 //POST
-router.post('/', async (req, res) => {
-    const {username, password} = req.body
+router.post('/',createAdmin)
 
-    try {
-        const admin = await AdminModel.create({username,password})
-        res.status(200).json(admin)
-    }
-    catch (error) {
-    res.status(400).json({error:error.message})
-    }
-    res.json({msg:'POST'})
-})
+//POST ONE
+router.post('/signin',postOneAdmin)
 
 //DELETE one
-router.delete('/:id', (req, res) => {
-    res.json({msg: 'DELETE by id'})
-})
+router.delete('/delete', deleteAdmin)
 
-//UPDATE one
-router.patch('/:id', (req, res) => {
-    res.json({msg: 'UPDATE by id'})
-})
+
 export default router;
