@@ -33,6 +33,7 @@ const getAllBlogs = async (req, res) => {
 // create a new blog
 const createBlog = async (req, res) => {
   const { title, author, content, date, image } = req.body;
+
   //add blog to db
   try {
     const newBlog = new blog(req.body);
@@ -76,7 +77,7 @@ const deleteBlog = async (req, res) => {
     if (!deletedBlog) {
       return res.status(404).json({ error: "Blog post not found" });
     }
-    res.status(204).send(); // 204 No Content
+    res.status(204).send(); // the server successfully processed the client's request, and that the server is not returning any content.
   } catch (error) {
     res.status(500).json({ error: "Failed to delete the blog post" });
   }
