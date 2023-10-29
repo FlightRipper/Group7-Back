@@ -1,4 +1,5 @@
 import express from "express";
+import upload from "../config/multerConfig.js";
 import {
   createBlog,
   getAllBlogs,
@@ -17,10 +18,10 @@ router.get("/:id", getBlogById);
 router.get("/", getAllBlogs);
 
 // post a new blog
-router.post("/", createBlog);
+router.post("/", upload.single("image"), createBlog);
 
 //update a blog
-router.patch("/:id", updateBlog);
+router.patch("/:id", upload.single("image"), updateBlog);
 
 // delete a workout
 router.delete("/:id", deleteBlog);

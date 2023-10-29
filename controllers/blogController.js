@@ -1,4 +1,4 @@
-import blog from "../model/blogModel.js";
+import blogModel from "../model/blogModel.js";
 import mongoose from "mongoose";
 
 // get a single blog
@@ -8,7 +8,7 @@ const getBlogById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(404).json({ error: "Blog not found" });
     }
-    const singleBlog = await blog.findById(id);
+    const singleBlog = await blogModel.findById(id);
 
     if (!singleBlog) {
       return res.status(404).json({ error: "Blog not found" });
@@ -23,44 +23,70 @@ const getBlogById = async (req, res) => {
 // get all blogs
 const getAllBlogs = async (req, res) => {
   try {
-    const blogs = await blog.find({}).sort({ createdAt: -1 });
+    const blogs = await blogModel.find({}).sort({ createdAt: -1 });
     res.status(200).json(blogs);
   } catch (error) {
     res.status(500).json({ error: "Failed to retrieve blog posts" });
   }
 };
 
-// create a new blog
+//create a new blog
 const createBlog = async (req, res) => {
-  const { title, author, content, date, image } = req.body;
+  const { title, author, content, date } = req.body;
+  const image = req.file ? req.file.path : "/images/no-image.jpg"; // Default image path
 
-  //add blog to db
   try {
-    const newBlog = new blog(req.body);
-    const savedBlog = await newBlog.save();
-    res.status(201).json(savedBlog);
+    // Check if no image file was uploaded
+    const usedDefaultImage = !req.file;
+
+    // Create the new blog post
+    const newBlog = await blogModel.create({
+      title,
+      author,
+      content,
+      date,
+      image,
+    });
+
+    // Provide a note in the response if the default image was used
+    if (usedDefaultImage) {
+      res.status(200).json({
+        message: "Blog created with the default image",
+        blog: newBlog,
+      });
+    } else {
+      res.status(200).json(newBlog);
+    }
   } catch (error) {
     res.status(400).json({ error: "Failed to create a new blog post" });
   }
 };
 
-//update a blog
+// update a blog
 const updateBlog = async (req, res) => {
   const { id } = req.params;
+  const { title, author, content, date } = req.body;
+  const newImage = req.file ? req.file.path : "/images/no-image.jpg"; // New image path
+
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(404).json({ error: "Failed to update" });
+      return res.status(404).json({ error: "Blog Not found" });
     }
-    // Update the blog post
-    const updatedBlog = await blog.findOneAndUpdate(
-      { _id: id },
+
+    const updatedBlog = await blogModel.findByIdAndUpdate(
+      id,
       {
-        ...req.body, // Update object based on what the user entered
-      }
+        title,
+        author,
+        content,
+        date,
+        image: newImage,
+      },
+      { new: true } // Add this option to get the updated document as the result
     );
 
     if (!updatedBlog) {
-      return res.status(400).json({ error: "Blog not found" });
+      return res.status(404).json({ error: "Blog not found" });
     }
 
     res.status(200).json(updatedBlog);
@@ -73,7 +99,7 @@ const updateBlog = async (req, res) => {
 const deleteBlog = async (req, res) => {
   const { id } = req.params;
   try {
-    const deletedBlog = await blog.findByIdAndDelete(id);
+    const deletedBlog = await blogModel.findByIdAndDelete(id);
     if (!deletedBlog) {
       return res.status(404).json({ error: "Blog post not found" });
     }
