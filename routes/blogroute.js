@@ -18,10 +18,10 @@ router.get("/:id", getBlogById);
 router.get("/", getAllBlogs);
 
 // post a new blog
-router.post("/", upload.single("image"), createBlog);
+router.post("/", upload.array("image", 3), createBlog);
 
 //update a blog
-router.patch("/:id", upload.single("image"), updateBlog);
+router.patch("/:id", upload.array("image", 3), updateBlog);
 
 // delete a workout
 router.delete("/:id", deleteBlog);

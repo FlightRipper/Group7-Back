@@ -1,3 +1,4 @@
+import { ClientSession } from "mongodb";
 import blogModel from "../model/blogModel.js";
 import mongoose from "mongoose";
 
@@ -33,19 +34,23 @@ const getAllBlogs = async (req, res) => {
 //create a new blog
 const createBlog = async (req, res) => {
   const { title, author, content, date } = req.body;
-  const image = req.file ? req.file.path : "/images/no-image.jpg"; // Default image path
+  const images = req.files; // Use req.files for an array of image files
 
   try {
-    // Check if no image file was uploaded
-    const usedDefaultImage = !req.file;
+    // Check if no image files were uploaded
+    const usedDefaultImage = !images || images.length === 0;
 
     // Create the new blog post
+    const imagePaths = usedDefaultImage
+      ? ["/images/no-image.jpg"]
+      : images.map((each) => each.path);
+
     const newBlog = await blogModel.create({
       title,
       author,
       content,
       date,
-      image,
+      images: imagePaths, // Store an array of image paths
     });
 
     // Provide a note in the response if the default image was used
@@ -66,9 +71,16 @@ const createBlog = async (req, res) => {
 const updateBlog = async (req, res) => {
   const { id } = req.params;
   const { title, author, content, date } = req.body;
-  const newImage = req.file ? req.file.path : "/images/no-image.jpg"; // New image path
+  const images = req.files; // Corrected to access uploaded files
 
   try {
+    // Check if no image files were uploaded
+    const usedDefaultImage = !images || images.length === 0;
+
+    const imagePaths = usedDefaultImage
+      ? ["/images/no-image.jpg"]
+      : images.map((each) => each.path);
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(404).json({ error: "Blog Not found" });
     }
@@ -80,11 +92,10 @@ const updateBlog = async (req, res) => {
         author,
         content,
         date,
-        image: newImage,
+        images: imagePaths, // Update the images property
       },
       { new: true } // Add this option to get the updated document as the result
     );
-
     if (!updatedBlog) {
       return res.status(404).json({ error: "Blog not found" });
     }
