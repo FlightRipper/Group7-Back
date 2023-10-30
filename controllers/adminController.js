@@ -2,11 +2,12 @@ import AdminModel from '../models/adminModel.js';
 
 //GET all
 const getAdmin = async (req, res) => {
-    const admins = await AdminModel.find({}).sort({createAt: -1})
 
-    res.status(200).json(admins)
+const admins = await AdminModel.find({}).sort({createAt: -1})
+
+res.status(200).json(admins)
+
 }
-
 
 //POST one admin (authenticate)
 const postOneAdmin = async (req, res) => {
@@ -14,7 +15,7 @@ const postOneAdmin = async (req, res) => {
 
     try {
         // Query the database to find an admin with the provided username and password
-        const admin = await AdminModel.findOne({ username, password });
+        const admin = await AdminModel.findOne({ username, password});
 
         if (admin) {
             // Admin with the provided username and password found
@@ -33,22 +34,24 @@ const postOneAdmin = async (req, res) => {
 //POST
 const createAdmin = async (req, res) => {
     const {username, password} = req.body
-
+    
     try {
-        const admin = await AdminModel.create({username,password})
+        console.log("file",req.files)
+        const image = req.files.map(each => each.path)
+console.log(image)      
+        const admin = await AdminModel.create({username,password,image})
         res.status(200).json(admin)
     }
     catch (error) {
     res.status(400).json({error:error.message})
     }
-    res.json({msg:'POST'})
-}
+};
 
 //DELETE
 const deleteAdmin = async (req, res) => {
-    const {username,password} = req.body
+    const {username,password,image} = req.body
     try{
-const toBeDeleted = await AdminModel.findOneAndDelete({ username, password });
+const toBeDeleted = await AdminModel.findOneAndDelete({ username, password,image });
 
 if (toBeDeleted) {
 

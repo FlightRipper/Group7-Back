@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import AdminRoute from './routes/admin.js';
 import mongoose from 'mongoose';
 
+
+
 // Express App
 const app = express();
 
@@ -33,4 +35,3 @@ mongoose.connect(process.env.MONGO_URI)
     console.log(error)
 })
 
-//Listening for requests
