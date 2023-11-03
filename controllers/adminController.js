@@ -2,7 +2,7 @@ import Admin from "../models/adminModel.js";
 
 const loginAdmin = async (req, res) => {
   const { username, password } = req.body;
-
+  console.log(username, password);
   try {
     const admin = await Admin.findOne({ username });
 
@@ -11,7 +11,7 @@ const loginAdmin = async (req, res) => {
     }
 
     if (password === admin.password) {
-      res.status(200).json(admin);
+      res.status(200).json({status:"ok",data:admin});
     } else {
       res.status(401).json({ error: "Incorrect password" });
     }
