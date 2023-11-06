@@ -1,70 +1,114 @@
-import AdminModel from '../models/adminModel.js';
+import Admin from "../models/adminModel.js";
 
-//GET all
-const getAdmin = async (req, res) => {
+const loginAdmin = async (req, res) => {
+  const { username, password } = req.body;
 
-const admins = await AdminModel.find({}).sort({createAt: -1})
+  try {
+    const admin = await Admin.findOne({ username });
 
-res.status(200).json(admins)
-
-}
-
-//POST one admin (authenticate)
-const postOneAdmin = async (req, res) => {
-    const {username, password} = req.body
-
-    try {
-        // Query the database to find an admin with the provided username and password
-        const admin = await AdminModel.findOne({ username, password});
-
-        if (admin) {
-            // Admin with the provided username and password found
-            res.status(200).json({ message: 'Admin access granted' });
-        } else {
-            // No admin with matching credentials found
-            res.status(401).json({ error: 'Unauthorized' });
-        }
-    } catch (error) {
-        // Handle any database query errors here
-        res.status(500).json({ error: 'Internal server error' });
+    if (!admin) {
+      return res.status(404).json({ error: "Admin not found" });
     }
+
+    if (password === admin.password) {
+      res.status(200).json(admin);
+    } else {
+      res.status(401).json({ error: "Incorrect password" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to retrieve the admin" });
+  }
 };
 
-
-//POST
+// Create a new admin
 const createAdmin = async (req, res) => {
-    const {username, password} = req.body
-    
-    try {
-        console.log("file",req.files)
-        const image = req.files.map(each => each.path)
-console.log(image)      
-        const admin = await AdminModel.create({username,password,image})
-        res.status(200).json(admin)
-    }
-    catch (error) {
-    res.status(400).json({error:error.message})
-    }
+  try {
+    const newAdmin = new Admin(req.body);
+    const savedAdmin = await newAdmin.save();
+    res.status(201).json(savedAdmin);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to create a new admin" });
+  }
 };
 
-//DELETE
+// Get all
+const getAllAdmins = async (req, res) => {
+  try {
+    const admins = await Admin.find({}).sort({ createdAt: -1 });
+    res.status(200).json(admins);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to retrieve admin users" });
+  }
+};
+
+// Get by ID
+const getAdminById = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const admin = await Admin.findById(id);
+
+    if (!admin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    res.status(200).json(admin);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to retrieve the requested admin" });
+  }
+};
+
+// Update
+const updateAdmin = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const existingAdmin = await Admin.findById(id);
+
+    if (!existingAdmin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(id, req.body);
+
+    if (!updatedAdmin) {
+      return res.status(404).json({ error: "Failed to update admin" });
+    }
+
+    res.status(200).json(updatedAdmin);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update the admin" });
+  }
+};
+
+// Delete an admin by ID
 const deleteAdmin = async (req, res) => {
-    const {username,password,image} = req.body
-    try{
-const toBeDeleted = await AdminModel.findOneAndDelete({ username, password,image });
+  const id = req.params.id;
 
-if (toBeDeleted) {
+  try {
+    const deletedAdmin = await Admin.findByIdAndDelete(id);
 
-    res.status(200).json({ message: 'Admin deleted successfully' });
-} else {
+    if (!deletedAdmin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
 
-    res.status(401).json({ error: 'wrong username and/or password' });
-} }
- catch (error) {
+    res.status(204).json(deletedAdmin);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to delete the admin" });
+  }
+};
 
-res.status(500).json({ error: 'Internal server error' });
-}
-}
-
-
-export {createAdmin,getAdmin,postOneAdmin,deleteAdmin}
+export {
+  createAdmin,
+  getAllAdmins,
+  getAdminById,
+  updateAdmin,
+  deleteAdmin,
+  loginAdmin,
+};

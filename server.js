@@ -1,37 +1,29 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import AdminRoute from './routes/admin.js';
-import mongoose from 'mongoose';
+import express from "express";
+import dotenv from "dotenv";
+import productRoutes from "./routes/productRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import connectDB from "./config/db.js";
 
+dotenv.config();
+connectDB();
 
-
-// Express App
+const PORT = process.env.PORT;
 const app = express();
+app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
 
-// .env
-dotenv.config()
+app.use((req, res, next) => {
+  console.log(req.path, req.method);
+  next();
+});
 
-// Middleware
-app.use(express.json())
-app.use((req,res, next)=>{
-    console.log(req.path, req.method)
-    next()
-})
+app.use("/api", productRoutes);
+app.use("/api", categoryRoutes);
+app.use("/api", blogRoutes);
+app.use("/api", adminRoutes);
 
-//Routes
-app.use('/api/admin',AdminRoute)
-
-//Connect to db
-mongoose.connect(process.env.MONGO_URI)
-
-.then(()=>{
-
-    app.listen(process.env.PORT, ()=>{
-      console.log('Connected to db & listening on port', process.env.PORT)
-    })
-})
-
-.catch((error)=> {
-    console.log(error)
-})
-
+app.listen(PORT, () => {
+  console.log("Connected to MongoDB & Listening for requests on port", PORT);
+});
