@@ -4,7 +4,7 @@ import upload from "../middlewares/uploadMiddleware.js";
 import {
   createBlog,
   getAllBlogs,
-  getBlogById,
+  getBlogById,  
   updateBlog,
   deleteBlog,
 } from "../controllers/blogController.js";
